@@ -5,21 +5,23 @@ Created on 13 feb. 2019
 '''
 
 import os
-os.chdir("C:/Users/javie/OneDrive - AUSTRAL/Investigación - JGS/Sudden Stop - Phoenix Miracle II - PHX (2)/Model/Python")
+tmpDir = "C:/Users/javie/OneDrive - AUSTRAL/Investigación - JGS/Sudden Stop - Phoenix Miracle II - PHX (2)/Model/Python/Data/" 
+os.chdir(tmpDir)
+del tmpDir
 
+import seaborn as sns
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+
 
 # Read Data Files
 fileID = "1F"
 
-FirmsFile = 'Data/Firms.' + fileID + ".csv"
+FirmsFile = 'Firms.' + fileID + ".csv"
 Firms = pd.read_csv(FirmsFile)
 del FirmsFile
 
-ConsumersFile ='Data/Consumers.' + fileID + ".csv"
+ConsumersFile ='Consumers.' + fileID + ".csv"
 Consumers = pd.read_csv(ConsumersFile)
 del ConsumersFile
 
@@ -57,6 +59,9 @@ def firmsPlot(df, runs, varsToDraw, facet_kws = {}, cols = 5, rows = 3):
                 'kind' : "line",
                 'facet_kws' : facet_kws
                 }
+    
+    sns.set()
+    sns.set_context("poster")
 
     if len(runs) == 1:
         firmsOneRunPlot(df, runs, varsToDraw, argsPlot, cols)
@@ -73,8 +78,6 @@ def firmsOneRunPlot(df, run, varsToDraw, argsPlot, cols):
 
     tmpDF = tmpDF.melt(id_vars=['tick','FirmID'], value_vars = varsToDraw)
 
-    sns.set(font_scale = 1.5)
-
     cols = min(cols, len(varsToDraw))
 
     argsPlot.update({'data' : tmpDF, 'col_wrap' : cols })
@@ -87,17 +90,11 @@ def firmsOneVarPlot(df, runs, varsToDraw, argsPlot, cols):
 
     tmpDF = df.loc[df.run.isin(runs), ['run','tick','FirmID'] + varsToDraw]
 
-    #sns.set(font_scale = 1.5)
-    sns.set()
-    sns.set_context("poster")
-
     argsPlot.update({'y' : varsToDraw[0], 
                      'col' : "run",
                      'data' : tmpDF,
                      'col_wrap' : cols
-                     })
-        
-#                      'facet_kws' : argsPlot.get('facet_kws').update({'sharey' : True})
+                     })        
         
     sns.relplot(**argsPlot)
 
@@ -111,8 +108,6 @@ def firmsMultiPlot(df, runs, varsToDraw, argsPlot, cols, rows):
 
     tmpDF = df.loc[df.run.isin(runs), ['run','tick','FirmID'] + varsToDraw]
     tmpDF = tmpDF.melt(id_vars=['run','tick','FirmID'], value_vars = varsToDraw)
-
-    sns.set(font_scale = 1.5)
 
     argsPlot.update({'col' : 'run', 'row' : 'variable', 'data' : tmpDF})
     sns.relplot(**argsPlot)
