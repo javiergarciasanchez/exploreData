@@ -9,8 +9,8 @@ os.chdir("C:/Users/javie/OneDrive - AUSTRAL/Investigación - JGS/Sudden Stop - Ph
 
 os.listdir(".")
 
-timeStamp = "2019.feb..22.11_00_12"
-newID = "1F"
+timeStamp = "2019.feb..23.12_39_18"
+newID = "30F"
 
 for filename in os.listdir("."):
     newFN = filename.replace(timeStamp, newID)
