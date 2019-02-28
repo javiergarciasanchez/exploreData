@@ -8,25 +8,6 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 
-# Read Data Files
-def readDataFiles(fileID = "20F"):
-
-    import os
-    path = "C:\\Users\javie\OneDrive - AUSTRAL\\Investigación - JGS\\Sudden Stop - Phoenix Miracle II - PHX (2)\\Model\\Python\\Data"    
-    os.chdir(path)
-    
-    FirmsFile = 'Firms.' + fileID + ".csv"
-    Firms = pd.read_csv(FirmsFile)
-    del FirmsFile
-
-    ConsumersFile ='Consumers.' + fileID + ".csv"
-    Consumers = pd.read_csv(ConsumersFile)
-    del ConsumersFile
-
-    del fileID
-    
-    return [Firms, Consumers]
-
 #replace 'Infinity' as higher limit and join lolimit and hilimit to draw a range
 def joinLimits(df):
 
@@ -42,28 +23,6 @@ def joinLimits(df):
     retval.drop('ExpectedLowLimit', axis = 1, inplace = True)
 
     return retval.append(dfL)
-
-
-# Percentile grouping
-def groupByPerc(df_passed, var , var_lab, bins = 3):
-
-    df = df_passed.copy()
-    
-    mRun = int(max(df.run))
-    
-    gdf = pd.DataFrame(columns= ["run","FirmNumID", "G_" + var_lab])
-
-    lab =list(map(lambda x : var_lab + '_' + str(x), range(1,bins+1)))
-    
-    for r in range(1, mRun + 1):
-        
-        rDF = df.loc[(df.run == r) & (df.tick == 1),["run","FirmNumID", var]]
-        rDF['G_' + var_lab] = pd.qcut(rDF.loc[:, var], bins, labels = lab)       
-        gdf = gdf.append(rDF.drop(columns=var))
- 
-    df = df.merge(gdf, how = "left", on = ["run", "FirmNumID"])
-
-    return df
 
 
 # Define ploting functions
