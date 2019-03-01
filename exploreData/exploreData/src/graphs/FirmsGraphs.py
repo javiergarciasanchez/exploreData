@@ -27,7 +27,7 @@ def joinLimits(df):
 
 # Define ploting functions
 
-def firmsPlot(df, runs, varsToDraw, firmGroup = "FirmID", facet_kws = {}, cols = 5, rows = 3):
+def firmsPlot(df, rSeeds, varsToDraw, firmGroup = "FirmID", facet_kws = {}, cols = 5, rows = 3):
 
     if 'ExpectedLimit' in varsToDraw: df = joinLimits(df)
     
@@ -45,18 +45,18 @@ def firmsPlot(df, runs, varsToDraw, firmGroup = "FirmID", facet_kws = {}, cols =
     sns.set()
     sns.set_context("poster")
 
-    if len(runs) == 1:
-        firmsOneRunPlot(df, runs, varsToDraw, firmGroup, argsPlot, cols)
+    if len(rSeeds) == 1:
+        firmsOneRandSeedPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols)
     elif len(varsToDraw) == 1:
-        firmsOneVarPlot(df, runs, varsToDraw, firmGroup, argsPlot, cols)
+        firmsOneVarPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols)
     else:
-        firmsMultiPlot(df, runs, varsToDraw, firmGroup, argsPlot, cols, rows)
+        firmsMultiPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols, rows)
 
     return
 
-def firmsOneRunPlot(df, run, varsToDraw, firmGroup, argsPlot, cols):
+def firmsOneRandSeedPlot(df, rSeed, varsToDraw, firmGroup, argsPlot, cols):
 
-    tmpDF = df[df.run==run[0]].loc[:, ['tick', firmGroup] + varsToDraw]
+    tmpDF = df[df.randomSeed==rSeed[0]].loc[:, ['tick', firmGroup] + varsToDraw]
 
     tmpDF = tmpDF.melt(id_vars=['tick', firmGroup], value_vars = varsToDraw)
 
@@ -68,12 +68,12 @@ def firmsOneRunPlot(df, run, varsToDraw, firmGroup, argsPlot, cols):
     
     return
 
-def firmsOneVarPlot(df, runs, varsToDraw, firmGroup, argsPlot, cols):
+def firmsOneVarPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols):
 
-    tmpDF = df.loc[df.run.isin(runs), ['run','tick', firmGroup] + varsToDraw]
+    tmpDF = df.loc[df.randomSeed.isin(rSeeds), ['randomSeed','tick', firmGroup] + varsToDraw]
 
     argsPlot.update({'y' : varsToDraw[0], 
-                     'col' : "run",
+                     'col' : "randomSeed",
                      'data' : tmpDF,
                      'col_wrap' : cols
                      })        
@@ -82,16 +82,16 @@ def firmsOneVarPlot(df, runs, varsToDraw, firmGroup, argsPlot, cols):
 
     return
 
-def firmsMultiPlot(df, runs, varsToDraw, firmGroup, argsPlot, cols, rows):
+def firmsMultiPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols, rows):
 
-    #Truncate runs and vars to proper size
-    runs = runs[:cols]
+    #Truncate randoSeeds and vars to proper size
+    rSeeds = rSeeds[:cols]
     varsToDraw = varsToDraw[:rows]
 
-    tmpDF = df.loc[df.run.isin(runs), ['run','tick', firmGroup] + varsToDraw]
-    tmpDF = tmpDF.melt(id_vars=['run','tick', firmGroup], value_vars = varsToDraw)
+    tmpDF = df.loc[df.randomSeed.isin(rSeeds), ['randomSeed','tick', firmGroup] + varsToDraw]
+    tmpDF = tmpDF.melt(id_vars=['randomSeed','tick', firmGroup], value_vars = varsToDraw)
 
-    argsPlot.update({'col' : 'run', 'row' : 'variable', 'data' : tmpDF})
+    argsPlot.update({'col' : 'randomSeed', 'row' : 'variable', 'data' : tmpDF})
     sns.relplot(**argsPlot)
 
     return

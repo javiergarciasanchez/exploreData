@@ -3,11 +3,12 @@ Created on 13 feb. 2019
 
 @author: javie
 '''
-
+import os
+import pandas as pd
 
 # Rename Files
 def renameFiles(oldN, newN):
-    import os
+    
 #    os.chdir("C:/Users/javie/OneDrive - AUSTRAL/Investigación - JGS/Sudden Stop - Phoenix Miracle II - PHX (2)/Model/Python/Data")
 
     for filename in os.listdir("."):
@@ -18,7 +19,7 @@ def renameFiles(oldN, newN):
 
 # Read Data Files
 def readFirmFile(fileID = "20F"):
-  
+    
     FirmsFile = 'Firms.' + fileID + ".csv"
     Firms = pd.read_csv(FirmsFile)
     del FirmsFile
@@ -47,14 +48,17 @@ def readParamFile(fileID = "20F"):
     
     return Params
 
-def readDataFiles(fileID = "20F"):
+def readDataFiles(fileID = "20F", consumers=False):
 
-#    import os
 #    path = "C:\\Users\javie\OneDrive - AUSTRAL\\Investigación - JGS\\Sudden Stop - Phoenix Miracle II - PHX (2)\\Model\\Python\\Data"    
-#    os.chdir(path)
-    
+#   os.chdir(path)
+
     Firms = readFirmFile(fileID)
-    Consumers = readConsumerFile(fileID)
     Params = readParamFile(fileID)
     
-    return [Firms, Consumers, Params]
+    if consumers :
+        Consumers = readConsumerFile(fileID)
+        return [Firms, Consumers, Params]
+    else:
+        print("hola2")
+        return [Firms, Params]

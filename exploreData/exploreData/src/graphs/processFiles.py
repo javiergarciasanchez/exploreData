@@ -1,45 +1,33 @@
 # -*- coding: utf-8 -*-
 
 
-import seaborn as sns
 import numpy as np
 import pandas as pd
 
+#Hay que poner los nombres de los escenarios antes de llamar a la función
 def setScenariosToData(data, param, scenTab):
     
-    runsXScen = pd.DataFrame(columns = ['run','scenario'])
+    sT = scenTab[scenTab.scenName != ""]
     
-    for i, s in scenTab.iterrows():        
-        runsXScen = runsXScen.append(Param.loc[eval(scenarios[i])].assign(scenario = scen_lab[i]))
+    runsXScen = pd.DataFrame()
+    
+    relevantParam = sT.drop(columns=['scenName','scenLabel']).columns
+    
+    for i, s in sT.iterrows():
+        paramsWScen = param.copy()
+        for pName in relevantParam:
+            paramsWScen = paramsWScen.loc[param[pName] == s[pName]]
+        
+        paramsWScen['scenario'] = s.scenName
+        paramsWScen['scenLabel'] = s.scenLabel
+        
+        runsXScen = runsXScen.append(paramsWScen)
 
-    return data.merge(scen, on='run')
+    return data.merge(runsXScen, on='run')
 
-#ret = getScenarios(F, Param,\
-#        ["(round(df.qualityDiscountMostLikely, 3) == 0.999) & (round(df.qualityDiscountMean, 3) == 0.998)", \
-#             "(round(df.qualityDiscountMostLikely, 3) == 0.9) & (round(df.qualityDiscountMean, 3) == 0.8)"],\
-#       ["sin_disc","con_disc"])
-
-# Get Scenarios
-# Parameters
-#
-# scenarios = ["(round(df.qualityDiscountMostLikely, 3) == 0.999) & (round(df.qualityDiscountMean, 3) == 0.998)", \
-#             "(round(df.qualityDiscountMostLikely, 3) == 0.9) & (round(df.qualityDiscountMean, 3) == 0.8)"]
-#
-# scen_lab = ["sin_disc","con_disc"]
-    
-
-def getScenarios(data, Param, scenarios , scen_lab):
-    
-    retval = data.copy()
-    
-    scen = pd.DataFrame(columns = ['run','scenario'])
-    
-    for i in range(len(scenarios)):        
-        scen = scen.append(Param.loc[eval(scenarios[i])].assign(scenario = scen_lab[i]))
-
-    retval = retval.merge(scen, on='run')
-    
-    return retval
+def write(data, fileName):
+    with pd.ExcelWriter(fileName) as writer:
+        data.to_excel(writer)
 
 # =============================================================================
 # Creates a Table of the Scenarios in a Run
@@ -49,18 +37,18 @@ def getScenarios(data, Param, scenarios , scen_lab):
 # =============================================================================
 def getScenariosTable(param):
 
-    paramTab = pd.DataFrame(([""],[""]), columns= ['name','label'])
+    paramTab = pd.DataFrame({'scenName':[""],'scenLabel':[""]})
     
     relevantParam = []
 
     for c in param.columns:
     
         if (c != 'run') & (c != 'randomSeed'):
-
+            
             flatParam = param.loc[:,c].unique()
-    
+            
             if len(flatParam) > 1:
-                relevantParam = relevantParam.append(pd.DataFrame(data = flatParam, columns=[c]))
+                relevantParam.append(pd.DataFrame(data = flatParam, columns=[c]))
     
     paramTab = paramTab.assign(key=1)
     for p in relevantParam:
@@ -88,22 +76,16 @@ def getRawScenarios(param):
     return paramSet    
             
 # Percentile grouping
-def setPercetile(df_passed, var , var_lab, bins = 3):
-
-    df = df_passed.copy()
-    
-    mRun = int(max(df.run))
+def setPercentile(df, var , var_lab, bins = 3):
     
     gdf = pd.DataFrame(columns= ["run","FirmNumID", "G_" + var_lab])
 
     lab =list(map(lambda x : var_lab + '_' + str(x), range(1,bins+1)))
     
-    for r in range(1, mRun + 1):
+    for r in df.run.unique():
         
         rDF = df.loc[(df.run == r) & (df.tick == 1),["run","FirmNumID", var]]
         rDF['G_' + var_lab] = pd.qcut(rDF.loc[:, var], bins, labels = lab)       
         gdf = gdf.append(rDF.drop(columns=var))
  
-    df = df.merge(gdf, how = "left", on = ["run", "FirmNumID"])
-
-    return df
+    return df.merge(gdf, how = "left", on = ["run", "FirmNumID"])
