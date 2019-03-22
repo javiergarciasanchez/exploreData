@@ -26,7 +26,9 @@ def joinLimits(df):
 
 
 # Define ploting functions
-
+# Examples:
+#    firmsPlot(FtD, range(2, 3), ["Quality"], "scenGr")
+#    firmsPlot(FtD, range(4, 5), ["Quality", "Price", "Demand"], "scenGr", facet_kws=dict(sharey=False))
 def firmsPlot(df, rSeeds, varsToDraw, firmGroup = "FirmID", facet_kws = {}, cols = 5, rows = 3):
 
     if 'ExpectedLimit' in varsToDraw: df = joinLimits(df)
@@ -48,7 +50,7 @@ def firmsPlot(df, rSeeds, varsToDraw, firmGroup = "FirmID", facet_kws = {}, cols
     if len(rSeeds) == 1:
         firmsOneRandSeedPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols)
     elif len(varsToDraw) == 1:
-        firmsOneVarPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols)
+        firmsOneVarPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols, rows)
     else:
         firmsMultiPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols, rows)
 
@@ -68,17 +70,22 @@ def firmsOneRandSeedPlot(df, rSeed, varsToDraw, firmGroup, argsPlot, cols):
     
     return
 
-def firmsOneVarPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols):
+def firmsOneVarPlot(df, rSeeds, varsToDraw, firmGroup, argsPlot, cols, rows):
 
     tmpDF = df.loc[df.randomSeed.isin(rSeeds), ['randomSeed','tick', firmGroup] + varsToDraw]
-
-    argsPlot.update({'y' : varsToDraw[0], 
-                     'col' : "randomSeed",
-                     'data' : tmpDF,
-                     'col_wrap' : cols
-                     })        
-        
-    sns.relplot(**argsPlot)
+ 
+    n = cols * rows  
+    pagsOfSeeds = [rSeeds[i:i+n] for i in range(0,len(rSeeds),n)]
+    
+    for pagOfSeeds in pagsOfSeeds:
+        tmpDF = df.loc[df.randomSeed.isin(pagOfSeeds), ['randomSeed','tick', firmGroup] + varsToDraw]
+        argsPlot.update({'y' : varsToDraw[0], 
+                         'col' : "randomSeed",
+                         'data' : tmpDF,
+                         'col_wrap' : cols
+                         })        
+            
+        sns.relplot(**argsPlot)
 
     return
 
